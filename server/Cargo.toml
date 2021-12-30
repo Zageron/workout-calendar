@@ -1,0 +1,24 @@
+[package]
+name = "workout-calendar-server"
+version = "0.0.1"
+authors = ["Zageron <hello@adambryant.ca>"]
+edition = "2021"
+
+
+[dependencies]
+actix-files = "0.6.0-beta.11"
+actix-http = "3.0.0-beta.17"
+actix-service = "2.0.2"
+actix-web = "4.0.0-beta.16"
+anyhow = "1.0.52"
+dotenv = "0.15.0"
+env_logger = "0.9.0"
+futures-core = "0.3.19"
+futures-util = "0.3.19"
+handlebars = { version = "4.1.6", features = ["dir_source"] }
+maplit = "1.0.2"
+mime = "0.3.16"
+mongodb = "2.1.0"
+ory-kratos-client = "0.8.2-alpha.1"
+serde = { version = "1.0.132", features = ["derive"] }
+serde_json = "1.0.73"

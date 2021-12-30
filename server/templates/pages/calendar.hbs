@@ -1,0 +1,17 @@
+{{#*inline "page"}}
+
+<div class="card">
+    <div class="card-header">
+        {{item_header}}
+    </div>
+    <div class="card-body">
+        <h4 class="card-title">{{item_title}}</h4>
+        <p class="card-text">{{item_description}}</p>
+    </div>
+    <div class="card-footer text-muted">
+        {{item_footer}}
+    </div>
+</div>
+
+{{/inline}}
+{{> (lookup this "parent")}}
