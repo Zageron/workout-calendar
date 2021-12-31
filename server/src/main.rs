@@ -4,6 +4,7 @@ extern crate dotenv;
 extern crate env_logger;
 
 use actix_files::Files;
+use actix_files::Directory;
 use actix_http::body::{BoxBody, EitherBody};
 use actix_web::{
     dev::ServiceResponse,
@@ -34,7 +35,7 @@ async fn index(
     root_template_data: web::Data<RootData>,
     _req: HttpRequest,
 ) -> HttpResponse {
-    let body = hb.render("pages/index", &root_template_data.data).unwrap();
+    let body = hb.render("pages/calendar", &root_template_data.data).unwrap();
     HttpResponse::Ok().body(body)
 }
 
@@ -111,7 +112,7 @@ async fn main() -> io::Result<()> {
     let handlebars_ref = web::Data::new(handlebars);
 
     let _route =
-        std::env::var("WASM_PATH").expect("Route is not set and is inferred to be unnecessary.");
+        std::env::var("ROUTE").expect("Route is not set and is inferred to be unnecessary.");
     let _base_url = std::env::var("BASE_URL");
     assert!(_base_url.is_ok());
 
@@ -167,7 +168,7 @@ async fn main() -> io::Result<()> {
             .service(web::resource("/").guard(guard::Get()).to(index))
             .service(web::resource("copyright").guard(guard::Get()).to(copyright))
             .service(web::resource("robots.txt").guard(guard::Get()).to(robots))
-            .service(Files::new("/", "./data/web"))
+            .service(Files::new("/", "./data"))
     })
     .bind("0.0.0.0:8081")?
     .run()
