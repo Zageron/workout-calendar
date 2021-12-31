@@ -1,0 +1,155 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cargo",
+            "command": "build",
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "label": "rust: cargo build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true,
+            },
+        },
+        {
+            "type": "cargo",
+            "command": "build",
+            "args": [
+                "--release"
+            ],
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "group": "build",
+            "label": "rust: cargo build release",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true,
+            },
+        },
+        {
+            "label": "Upgrade Dependencies",
+            "type": "shell",
+            "isBackground": false,
+            "command": [
+                "cargo",
+                "upgrade",
+                "--workspace",
+                "--allow-prerelease",
+                ";;",
+                "cargo",
+                "update"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true,
+                "close": true,
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Ory Proxy",
+            "type": "shell",
+            "isBackground": true,
+            "command": "ory",
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "args": [
+                "proxy",
+                "http://localhost",
+                "--sdk-url",
+                "https://gallant-leakey-n498g2rdpa.projects.oryapis.com"
+            ],
+            "problemMatcher": [
+                {
+                    "pattern": [
+                        {
+                            "regexp": ".",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": ".",
+                        "endsPattern": "."
+                    }
+                }
+            ]
+        },
+        {
+            "label": "WASM Watch",
+            "type": "shell",
+            "isBackground": true,
+            "command": "cargo",
+            "options": {
+                "cwd": "./client"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "args": [
+                "watch",
+                "-i",
+                ".gitignore",
+                "-i",
+                "pkg/*",
+                "-s",
+                "wasm-pack build --out-dir ../server/data/pkg --target web",
+            ],
+            "problemMatcher": [
+                {
+                    "pattern": [
+                        {
+                            "regexp": ".",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": ".",
+                        "endsPattern": "."
+                    }
+                }
+            ]
+        }
+    ]
+}

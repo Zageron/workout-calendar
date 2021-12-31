@@ -1,0 +1,42 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'workout-calendar-server'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=workout-calendar-server",
+                    "--package=workout-calendar-server"
+                ],
+                "filter": {
+                    "name": "workout-calendar-server",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/server",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'workout-calendar-server'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=workout-calendar-server",
+                    "--package=workout-calendar-server"
+                ],
+                "filter": {
+                    "name": "workout-calendar-server",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/server",
+        }
+    ]
+}

@@ -1,15 +1,17 @@
 [package]
 name = "workout-calendar-server"
-version = "0.0.1"
 authors = ["Zageron <hello@adambryant.ca>"]
+description = "actix-web driven static site generator."
+repository = "https://github.com/Zageron/workout-calendar"
+version = "0.0.1"
 edition = "2021"
 
 
 [dependencies]
-actix-files = "0.6.0-beta.11"
+actix-files = "0.6.0-beta.12"
 actix-http = "3.0.0-beta.17"
 actix-service = "2.0.2"
-actix-web = "4.0.0-beta.16"
+actix-web = "4.0.0-beta.18"
 anyhow = "1.0.52"
 dotenv = "0.15.0"
 env_logger = "0.9.0"

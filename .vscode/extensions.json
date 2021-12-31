@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "zerotaskx.rust-extension-pack",
+        "mikestead.dotenv",
+        "aaron-bond.better-comments",
+    ]
+}

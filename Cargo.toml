@@ -1,3 +1,5 @@
 [workspace]
-
 members = ["client", "server"]
+
+[profile.release]
+opt-level = "s"

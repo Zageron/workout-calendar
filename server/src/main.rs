@@ -111,13 +111,9 @@ async fn main() -> io::Result<()> {
     let handlebars_ref = web::Data::new(handlebars);
 
     let _route =
-        std::env::var("ROUTE").expect("Route is not set and is inferred to be unnecessary.");
+        std::env::var("WASM_PATH").expect("Route is not set and is inferred to be unnecessary.");
     let _base_url = std::env::var("BASE_URL");
     assert!(_base_url.is_ok());
-
-    let connection_result = connect().await;
-    let connection_success = connection_result.is_ok();
-    println!("Connected to Database: {:?}", connection_success);
 
     let root_template_data = RootData {
         data: btreemap! {
@@ -142,7 +138,6 @@ async fn main() -> io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(handlebars_ref.clone())
-            .app_data(web::Data::new(connection_result.clone()))
             .app_data(web::Data::new(root_template_data.clone()))
             .app_data(web::Data::new(learning_data.clone()))
             .wrap(NormalizePath::new(TrailingSlash::Trim))
