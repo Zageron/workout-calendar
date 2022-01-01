@@ -1,7 +1,10 @@
+mod youtube;
+
 #[macro_use]
 extern crate maplit;
 extern crate dotenv;
 extern crate env_logger;
+extern crate google_youtube3 as youtube3;
 
 use actix_files::Files;
 use actix_http::body::{BoxBody, EitherBody};
@@ -15,6 +18,8 @@ use actix_web::{
 use dotenv::dotenv;
 use handlebars::Handlebars;
 use mongodb::bson::doc;
+use youtube3::YouTube;
+use yup_oauth2::{self, InstalledFlowAuthenticator, InstalledFlowReturnMethod};
 use serde::Deserialize;
 use std::{collections::BTreeMap, io};
 
@@ -71,6 +76,28 @@ async fn learning_entry(
     println!("{}", body);
     HttpResponse::Ok().body(body)
 }
+
+async fn youtube() -> HttpResponse {
+    let secret = yup_oauth2::read_application_secret(".secrets/client_secret.json")
+            .await
+            .expect(".secrets/client_secret.json");
+
+    // Create an authenticator that uses an InstalledFlow to authenticate. The
+    // authentication tokens are persisted to a file named tokencache.json. The
+    // authenticator takes care of caching tokens to disk and refreshing tokens once
+    // they've expired.
+    let auth = InstalledFlowAuthenticator::builder(secret, InstalledFlowReturnMethod::HTTPRedirect)
+        .persist_tokens_to_disk(".secrets/tokencache.json")
+        .build()
+        .await
+        .unwrap();
+
+    let connector = hyper_rustls::HttpsConnector::with_native_roots();
+    let client = YouTube::new(hyper::Client::builder().build(connector), auth);
+    let playlist_items = youtube::request_playlists(&client).await;
+    HttpResponse::Ok().body(format!("{:?}", playlist_items))
+}
+
 
 async fn copyright(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
     let data = btreemap! {
@@ -167,6 +194,7 @@ async fn main() -> io::Result<()> {
                     ),
             )
             .service(web::resource("/").guard(guard::Get()).to(index))
+            .service(web::resource("youtube").guard(guard::Get()).to(youtube))
             .service(web::resource("copyright").guard(guard::Get()).to(copyright))
             .service(web::resource("robots.txt").guard(guard::Get()).to(robots))
             .service(Files::new("/", "./data"))
