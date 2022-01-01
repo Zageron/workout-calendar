@@ -4,6 +4,13 @@
   padding: 0;
 }
 
+.disable-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
 .root {
   background-color: lightgray;
 }
@@ -97,6 +104,10 @@
   right: 5px;
 }
 
+[draggable] * {
+  pointer-events: none;
+}
+
 body ul {
   padding: 0px;
 }
@@ -137,4 +148,8 @@ body ul .draggable:hover:after {
 
 .over {
   transform: scale(1.1, 1.1);
+}
+
+.active-drag-target {
+  opacity: 0.4;
 }

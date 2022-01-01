@@ -52,19 +52,26 @@ pub fn start() -> Result<(), JsValue> {
 }
 
 fn add_drag_and_drop_listeners(_node_list: Box<NodeList>) -> Result<(), JsValue> {
+    let drag_active: Rc<RefCell<bool>> = Rc::new(RefCell::new(false));
     let drag_source_content: Rc<RefCell<Option<web_sys::EventTarget>>> = Rc::new(RefCell::new(None));
     {
         let node_list = _node_list.clone();
         let captured_source_content = drag_source_content.clone();
+        let dragging = drag_active.clone();
         let drag_start = Closure::wrap(Box::new(move |event: DragEvent| {
-            let target: web_sys::EventTarget = event.target().unwrap();
-            let element: &Element = target.dyn_ref::<Element>().unwrap();
-            let data_transfer: DataTransfer = event.data_transfer().unwrap();
+            if !*dragging.borrow() {
+                let target: web_sys::EventTarget = event.target().unwrap();
+                let element: &Element = target.dyn_ref::<Element>().unwrap();
+                let data_transfer: DataTransfer = event.data_transfer().unwrap();
 
-            element.set_attribute("opacity", "0.4");
-            data_transfer.set_effect_allowed("move");
-            data_transfer.set_data("text/html", &element.inner_html());
-            *captured_source_content.borrow_mut() = Some(target);
+                let class_list: DomTokenList = element.class_list();
+                class_list.add(&to_js_array(&["active-drag-target"]));
+
+                data_transfer.set_effect_allowed("move");
+                data_transfer.set_data("text/html", &element.inner_html());
+                *captured_source_content.borrow_mut() = Some(target);
+                *dragging.borrow_mut() = true;
+            }
         }) as Box<dyn FnMut(_)> );
 
         register("dragstart", &drag_start, &node_list);
@@ -114,17 +121,27 @@ fn add_drag_and_drop_listeners(_node_list: Box<NodeList>) -> Result<(), JsValue>
     {
         let node_list = _node_list.clone();
         let captured_source_content = drag_source_content.clone();
+        let mut set_source_content = drag_source_content.clone();
         let drag_drop = Closure::wrap(Box::new(move |event: DragEvent| {
             let data_transfer: DataTransfer = event.data_transfer().unwrap();
             let target: web_sys::EventTarget = event.target().unwrap();
             let element: &Element = target.dyn_ref::<Element>().unwrap();
 
-            if let Some(dropped_target) = &*captured_source_content.borrow() {
-                data_transfer.set_effect_allowed("move");
+            console_log!("Pre drop");
+            if element.class_list().contains("draggable") {
+                console_log!("Dropping on Draggable");
+                if let Some(dropped_target) = &*captured_source_content.borrow() {
+                    data_transfer.set_effect_allowed("move");
 
-                let dropped_element: &Element = dropped_target.dyn_ref::<Element>().unwrap();
-                dropped_element.set_inner_html(element.inner_html().as_str());
-                element.set_inner_html(data_transfer.get_data("text/html").unwrap().as_str());
+                    let dropped_element: &Element = dropped_target.dyn_ref::<Element>().unwrap();
+                    dropped_element.set_inner_html(element.inner_html().as_str());
+                    element.set_inner_html(data_transfer.get_data("text/html").unwrap().as_str());
+                    
+                    console_log!("Dropped on Draggable");
+                    if let mut content = Rc::make_mut(&mut set_source_content).borrow_mut().as_ref() {
+                        content = None;
+                    }
+                }
             }
 
         }) as Box<dyn FnMut(_)> );
@@ -134,6 +151,7 @@ fn add_drag_and_drop_listeners(_node_list: Box<NodeList>) -> Result<(), JsValue>
     }
     {
         let node_list = _node_list.clone();
+        let dragging = drag_active.clone();
         let drag_end = Closure::wrap(Box::new(move |event: DragEvent| {
             let len = node_list.length();
             for i in 0..len {
@@ -145,7 +163,10 @@ fn add_drag_and_drop_listeners(_node_list: Box<NodeList>) -> Result<(), JsValue>
 
             let target: web_sys::EventTarget = event.target().unwrap();
             let element: &Element = target.dyn_ref::<Element>().unwrap();
-            element.set_attribute("opacity", "1");
+            
+            let class_list: DomTokenList = element.class_list();
+            class_list.remove(&to_js_array(&["active-drag-target"]));
+            *dragging.borrow_mut() = false;
         }) as Box<dyn FnMut(_)> );
 
         register("dragend", &drag_end, &_node_list);
