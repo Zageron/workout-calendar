@@ -150,6 +150,54 @@
                     }
                 }
             ]
+        },
+        {
+            "label": "Server Watch",
+            "type": "shell",
+            "isBackground": true,
+            "command": "cargo",
+            "options": {
+                "cwd": "./server"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "args": [
+                "watch",
+                "-i",
+                ".gitignore",
+                "-i",
+                "data/pkg/*",
+                "-i",
+                "target",
+                "-x",
+                "'run --bin workout-calendar-server'",
+            ],
+            "problemMatcher": [
+                {
+                    "pattern": [
+                        {
+                            "regexp": ".",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": ".",
+                        "endsPattern": "."
+                    }
+                }
+            ]
         }
     ]
 }
