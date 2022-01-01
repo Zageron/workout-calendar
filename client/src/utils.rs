@@ -14,7 +14,8 @@ pub fn set_panic_hook() {
 }
 
 pub fn to_js_array(values: &[&str]) -> Array {
-    return values.into_iter()
+    values
+        .iter()
         .map(|x| JsValue::from_str(x))
-        .collect::<Array>();
+        .collect::<Array>()
 }

@@ -4,7 +4,6 @@ extern crate dotenv;
 extern crate env_logger;
 
 use actix_files::Files;
-use actix_files::Directory;
 use actix_http::body::{BoxBody, EitherBody};
 use actix_web::{
     dev::ServiceResponse,
@@ -35,7 +34,9 @@ async fn index(
     root_template_data: web::Data<RootData>,
     _req: HttpRequest,
 ) -> HttpResponse {
-    let body = hb.render("pages/calendar", &root_template_data.data).unwrap();
+    let body = hb
+        .render("pages/calendar", &root_template_data.data)
+        .unwrap();
     HttpResponse::Ok().body(body)
 }
 
