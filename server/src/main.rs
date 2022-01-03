@@ -18,10 +18,13 @@ use actix_web::{
 use dotenv::dotenv;
 use handlebars::Handlebars;
 use mongodb::bson::doc;
-use youtube3::YouTube;
-use yup_oauth2::{self, InstalledFlowAuthenticator, InstalledFlowReturnMethod};
 use serde::Deserialize;
 use std::{collections::BTreeMap, io};
+use youtube3::{
+    hyper, hyper_rustls,
+    oauth2::{self, InstalledFlowAuthenticator, InstalledFlowReturnMethod},
+    YouTube,
+};
 
 #[derive(Clone, Debug, Deserialize)]
 struct RootData {
@@ -78,9 +81,9 @@ async fn learning_entry(
 }
 
 async fn youtube() -> HttpResponse {
-    let secret = yup_oauth2::read_application_secret(".secrets/client_secret.json")
-            .await
-            .expect(".secrets/client_secret.json");
+    let secret = oauth2::read_application_secret(".secrets/client_secret.json")
+        .await
+        .expect(".secrets/client_secret.json");
 
     // Create an authenticator that uses an InstalledFlow to authenticate. The
     // authentication tokens are persisted to a file named tokencache.json. The
