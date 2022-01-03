@@ -98,7 +98,6 @@ async fn youtube() -> HttpResponse {
     HttpResponse::Ok().body(format!("{:?}", playlist_items))
 }
 
-
 async fn copyright(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
     let data = btreemap! {
         "author".to_string() => "Zageron".to_string(),
