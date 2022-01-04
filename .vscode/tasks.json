@@ -58,10 +58,10 @@
                 "echo": true,
                 "reveal": "always",
                 "focus": true,
-                "panel": "new",
+                "panel": "dedicated",
                 "showReuseMessage": false,
                 "clear": true,
-                "close": true,
+                "close": false,
             },
             "problemMatcher": []
         },
