@@ -23,5 +23,4 @@
     "rust-analyzer.diagnostics.disabled": [
         "missing-unsafe"
     ],
-    "rust-analyzer.updates.channel": "nightly",
 }
