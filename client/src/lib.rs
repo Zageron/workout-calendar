@@ -3,6 +3,9 @@ mod utils;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use log::debug;
+use log::info;
+use log::trace;
 use utils::to_js_array;
 
 use wasm_bindgen::prelude::*;
@@ -15,32 +18,23 @@ use web_sys::{DataTransfer, Document, DomTokenList, DragEvent, Element, Node, No
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-#[wasm_bindgen]
-extern "C" {
-    // Use `js_namespace` here to bind `console.log(..)` instead of just
-    // `log(..)`
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
+use cfg_if::cfg_if;
 
-    // The `console.log` is quite polymorphic, so we can bind it with multiple
-    // signatures. Note that we need to use `js_name` to ensure we always call
-    // `log` in JS.
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_u32(a: u32);
-
-    // Multiple arguments too!
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_many(a: &str, b: &str);
-}
-
-macro_rules! console_log {
-    // Note that this is using the `log` function imported above during
-    // `bare_bones`
-    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+cfg_if! {
+    if #[cfg(feature = "console_log")] {
+        #[allow(dead_code)]
+        fn init_log() {
+            use log::Level;
+            console_log::init_with_level(Level::Trace).expect("error initializing log");
+        }
+    } else {
+        fn init_log() {}
+    }
 }
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
+    init_log();
     let window: Box<Window> = Box::new(web_sys::window().expect("no global `window` exists"));
     let document: Box<Document> =
         Box::new(window.document().expect("should have a document on window"));
@@ -125,9 +119,9 @@ fn add_drag_and_drop_listeners(_node_list: Box<NodeList>) -> Result<(), JsValue>
             let target: web_sys::EventTarget = event.target().unwrap();
             let element: &Element = target.dyn_ref::<Element>().unwrap();
 
-            console_log!("Pre drop");
+            trace!("Pre drop");
             if element.class_list().contains("draggable") {
-                console_log!("Dropping on Draggable");
+                debug!("Dropping on Draggable");
                 if let Some(dropped_target) = &*captured_source_content.borrow() {
                     data_transfer.set_effect_allowed("move");
 
@@ -135,7 +129,7 @@ fn add_drag_and_drop_listeners(_node_list: Box<NodeList>) -> Result<(), JsValue>
                     dropped_element.set_inner_html(element.inner_html().as_str());
                     element.set_inner_html(data_transfer.get_data("text/html").unwrap().as_str());
 
-                    console_log!("Dropped on Draggable");
+                    info!("Dropped on Draggable");
                     let mut _content = Rc::make_mut(&mut set_source_content).borrow_mut().as_ref();
                     _content = None;
                 }
