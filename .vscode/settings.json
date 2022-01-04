@@ -19,4 +19,9 @@
         "--check"
     ],
     "files.insertFinalNewline": true,
+    "rust-analyzer.cargo.allFeatures": true,
+    "rust-analyzer.diagnostics.disabled": [
+        "missing-unsafe"
+    ],
+    "rust-analyzer.updates.channel": "nightly",
 }
