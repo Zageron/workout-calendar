@@ -131,7 +131,7 @@
                 "-i",
                 "pkg/*",
                 "-s",
-                "wasm-pack build --out-dir ../server/data/pkg --target web",
+                "wasm-pack build --out-dir ../server/data/pkg --dev --no-typescript --target web --features default ",
             ],
             "problemMatcher": [
                 {
