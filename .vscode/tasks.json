@@ -129,6 +129,8 @@
                 "-i",
                 ".gitignore",
                 "-i",
+                "*.hbs",
+                "-i",
                 "pkg/*",
                 "-s",
                 "wasm-pack build --out-dir ../server/data/pkg --dev --no-typescript --target web --features default ",
