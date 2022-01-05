@@ -1,26 +1,26 @@
 {
+    "[rust]": {
+        "editor.formatOnSave": false
+    },
+    "editor.formatOnSave": true,
     "files.exclude": {
         "target/": true
     },
-    "editor.formatOnSave": true,
-    "[rust]": {
-        "editor.formatOnSave": false,
-    },
-    "rust-analyzer.checkOnSave.enable": true,
+    "files.insertFinalNewline": true,
+    "rust-analyzer.cargo.allFeatures": true,
     "rust-analyzer.checkOnSave.command": "clippy",
+    "rust-analyzer.checkOnSave.enable": true,
     "rust-analyzer.checkOnSave.extraArgs": [
         "--",
         "-D",
         "warnings"
     ],
+    "rust-analyzer.diagnostics.disabled": [
+        "missing-unsafe"
+    ],
     "rust-analyzer.rustfmt.extraArgs": [
         "--all",
         "--",
         "--check"
-    ],
-    "files.insertFinalNewline": true,
-    "rust-analyzer.cargo.allFeatures": true,
-    "rust-analyzer.diagnostics.disabled": [
-        "missing-unsafe"
-    ],
+    ]
 }
