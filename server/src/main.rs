@@ -80,7 +80,7 @@ async fn learning_entry(
     HttpResponse::Ok().body(body)
 }
 
-async fn youtube() -> HttpResponse {
+async fn youtube_view() -> HttpResponse {
     let secret = oauth2::read_application_secret(".secrets/client_secret.json")
         .await
         .expect(".secrets/client_secret.json");
@@ -99,6 +99,10 @@ async fn youtube() -> HttpResponse {
     let client = YouTube::new(hyper::Client::builder().build(connector), auth);
     let playlist_items = youtube::request_playlists(&client).await;
     HttpResponse::Ok().body(format!("{:?}", playlist_items))
+}
+
+async fn youtube_submit() -> HttpResponse {
+    todo!();
 }
 
 async fn copyright(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
@@ -196,7 +200,19 @@ async fn main() -> io::Result<()> {
                     ),
             )
             .service(web::resource("/").guard(guard::Get()).to(index))
-            .service(web::resource("youtube").guard(guard::Get()).to(youtube))
+            .service(
+                web::scope("/youtube")
+                    .service(
+                        web::resource(["/", ""])
+                            .guard(guard::Get())
+                            .to(youtube_view),
+                    )
+                    .service(
+                        web::resource(["/", ""])
+                            .guard(guard::Post())
+                            .to(youtube_submit),
+                    ),
+            )
             .service(web::resource("copyright").guard(guard::Get()).to(copyright))
             .service(web::resource("robots.txt").guard(guard::Get()).to(robots))
             .service(Files::new("/", "./data"))
