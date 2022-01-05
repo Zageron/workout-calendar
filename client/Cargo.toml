@@ -35,6 +35,7 @@ features = [
     'Event',
     'EventTarget',
     'HtmlElement',
+    'HtmlInputElement',
     'MouseEvent',
     'Node',
     'NodeList',

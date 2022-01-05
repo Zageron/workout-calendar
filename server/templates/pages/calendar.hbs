@@ -1,69 +1,81 @@
 {{#*inline "page"}}
 
-<div class="root disable-select">
-    <div class="schedule-container">
-        <div class="wrapper">
-            <div class="cell-row-header">
-                <p>WK 1</p>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Two</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Three</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Four</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Five</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Six</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Seven</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Eight</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell-row-header">
-                <p>WK 2</p>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Ten</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Eleven</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Twelve</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Thirteen</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Fourteen</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Fifteen</p>
-                <div class="box"></div>
-            </div>
-            <div class="cell draggable" draggable="true">
-                <p>Sixteen</p>
-                <div class="box"></div>
+<div class="root ">
+    <div class="youtube-input-area">
+        <form>
+            <label for="playlist-url">Playlist URL: </label>
+            <input type="url" id="playlist-url" name="playlist-url" placeholder="Playlist URL"
+                pattern="https:\/\/(www.)?youtube.com\/playlist\?list=[^#&$?]*.*"
+                title="Must be a valid youtube playlist URL." required autofocus autocomplete="off">
+            <input type="submit" value="Submit playlist" formmethod="post" />
+        </form>
+    </div>
+
+    <div class="calendar disable-select">
+        <div class="schedule-container">
+            <div class="wrapper">
+                <div class="cell-row-header">
+                    <p>WK 1</p>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Two</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Three</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Four</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Five</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Six</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Seven</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Eight</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell-row-header">
+                    <p>WK 2</p>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Ten</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Eleven</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Twelve</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Thirteen</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Fourteen</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Fifteen</p>
+                    <div class="box"></div>
+                </div>
+                <div class="cell draggable" draggable="true">
+                    <p>Sixteen</p>
+                    <div class="box"></div>
+                </div>
             </div>
         </div>
     </div>

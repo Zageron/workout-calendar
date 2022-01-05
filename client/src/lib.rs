@@ -10,7 +10,7 @@ use utils::to_js_array;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::{DataTransfer, Document, DomTokenList, DragEvent, Element, Node, NodeList, Window};
+use web_sys::{DataTransfer, Document, DomTokenList, DragEvent, Element, HtmlInputElement, Node, NodeList, Window};
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -41,7 +41,18 @@ pub fn start() -> Result<(), JsValue> {
 
     let node_items = Box::new(document.query_selector_all(".draggable").unwrap());
 
-    add_drag_and_drop_listeners(node_items)
+    add_drag_and_drop_listeners(node_items)?;
+    hook_url_input_validation_messaging(&document);
+
+    Ok(())
+}
+
+fn hook_url_input_validation_messaging(document: &Document) {
+    let input_element_result: Option<Element> = document.query_selector("#playlist-url").unwrap();
+    if let Some(element) = input_element_result {
+        let input_element = element.dyn_ref::<HtmlInputElement>();
+        input_element.unwrap().set_custom_validity("");
+    }
 }
 
 fn add_drag_and_drop_listeners(_node_list: Box<NodeList>) -> Result<(), JsValue> {
