@@ -13,7 +13,17 @@
 A youtube driven workout calendar.
 
 - [Workout Calendar](#workout-calendar)
+  - [Visual Studio Code](#visual-studio-code)
   - [Github Action Testing](#github-action-testing)
+
+## Visual Studio Code
+
+Make sure you include the following line in your local settings.json when working with web-sys.
+(This is included by default in this repository.)
+
+```json
+"rust-analyzer.procMacro.enable": true,
+```
 
 ## Github Action Testing
 
