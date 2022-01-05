@@ -10,7 +10,10 @@ use utils::to_js_array;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::{DataTransfer, Document, DomTokenList, DragEvent, Element, HtmlInputElement, Node, NodeList, Window};
+use web_sys::{
+    DataTransfer, Document, DomTokenList, DragEvent, Element, HtmlInputElement, Node, NodeList,
+    Window,
+};
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
