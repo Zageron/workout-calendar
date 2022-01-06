@@ -2608,6 +2608,7 @@ dependencies = [
  "ory-kratos-client",
  "serde",
  "serde_json",
+ "url 2.2.2",
 ]
 
 [[package]]
