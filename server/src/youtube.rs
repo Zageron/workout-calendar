@@ -1,6 +1,9 @@
 use youtube3::YouTube;
 
-pub async fn request_playlists(client: &YouTube) -> Vec<youtube3::api::PlaylistItem> {
+pub async fn request_playlists(
+    client: &YouTube,
+    playlist_id: &str,
+) -> Vec<youtube3::api::PlaylistItem> {
     let mut curr_page_token = String::new();
     let mut playlist_items = Vec::new();
 
@@ -11,7 +14,7 @@ pub async fn request_playlists(client: &YouTube) -> Vec<youtube3::api::PlaylistI
             .max_results(100)
             .page_token(&curr_page_token)
             .add_scope(youtube3::api::Scope::Readonly)
-            .playlist_id("PLhu1QCKrfgPX_3_Fir25lT1zjLvmjifl7")
+            .playlist_id(playlist_id)
             .doit()
             .await
         {

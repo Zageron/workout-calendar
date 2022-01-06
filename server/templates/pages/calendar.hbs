@@ -2,12 +2,12 @@
 
 <div class="root ">
     <div class="youtube-input-area">
-        <form>
-            <label for="playlist-url">Playlist URL: </label>
-            <input type="url" id="playlist-url" name="playlist-url" placeholder="Playlist URL"
+        <form action="youtube" method="post">
+            <label for="url">Playlist URL: </label>
+            <input type="url" id="url" name="url" placeholder="Playlist URL"
                 pattern="https:\/\/(www.)?youtube.com\/playlist\?list=[^#&$?]*.*"
                 title="Must be a valid youtube playlist URL." required autofocus autocomplete="off">
-            <input type="submit" value="Submit playlist" formmethod="post" />
+            <input type="submit" value="Submit playlist" />
         </form>
     </div>
 

@@ -80,29 +80,30 @@ async fn learning_entry(
     HttpResponse::Ok().body(body)
 }
 
-async fn youtube_view() -> HttpResponse {
-    let secret = oauth2::read_application_secret(".secrets/client_secret.json")
-        .await
-        .expect(".secrets/client_secret.json");
-
-    // Create an authenticator that uses an InstalledFlow to authenticate. The
-    // authentication tokens are persisted to a file named tokencache.json. The
-    // authenticator takes care of caching tokens to disk and refreshing tokens once
-    // they've expired.
-    let auth = InstalledFlowAuthenticator::builder(secret, InstalledFlowReturnMethod::HTTPRedirect)
-        .persist_tokens_to_disk(".secrets/tokencache.json")
-        .build()
-        .await
-        .unwrap();
-
-    let connector = hyper_rustls::HttpsConnector::with_native_roots();
-    let client = YouTube::new(hyper::Client::builder().build(connector), auth);
-    let playlist_items = youtube::request_playlists(&client).await;
-    HttpResponse::Ok().body(format!("{:?}", playlist_items))
+async fn youtube_view(_yt_client: web::Data<YouTube>) -> HttpResponse {
+    todo!();
 }
 
-async fn youtube_submit() -> HttpResponse {
-    todo!();
+#[derive(Deserialize)]
+struct YouTubeUrlForm {
+    url: String,
+}
+
+async fn youtube_submit(
+    yt_client: web::Data<YouTube>,
+    form: web::Form<YouTubeUrlForm>,
+) -> HttpResponse {
+    match url::Url::parse(&form.url) {
+        Ok(url) => {
+            if let Some((_query, arg)) = url.query_pairs().next() {
+                let playlist_items = youtube::request_playlists(&yt_client, &arg).await;
+                HttpResponse::Ok().body(format!("{:?}", playlist_items))
+            } else {
+                HttpResponse::Ok().body("No playlist ID.".to_string())
+            }
+        }
+        Err(_) => HttpResponse::Ok().body("No playlist ID.".to_string()),
+    }
 }
 
 async fn copyright(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
@@ -127,6 +128,27 @@ async fn robots(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
     builder.body(body)
 }
 
+async fn initialize_youtube() -> YouTube {
+    let secret = oauth2::read_application_secret(".secrets/client_secret.json")
+        .await
+        .expect(".secrets/client_secret.json");
+
+    // Create an authenticator that uses an InstalledFlow to authenticate. The
+    // authentication tokens are persisted to a file named tokencache.json. The
+    // authenticator takes care of caching tokens to disk and refreshing tokens once
+    // they've expired.
+    let auth = InstalledFlowAuthenticator::builder(secret, InstalledFlowReturnMethod::HTTPRedirect)
+        .persist_tokens_to_disk(".secrets/tokencache.json")
+        .build()
+        .await
+        .unwrap();
+
+    YouTube::new(
+        hyper::Client::builder().build(hyper_rustls::HttpsConnector::with_native_roots()),
+        auth,
+    )
+}
+
 #[actix_web::main]
 async fn main() -> io::Result<()> {
     dotenv().ok();
@@ -135,6 +157,8 @@ async fn main() -> io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=info");
     #[cfg(debug_assertions)]
     env_logger::init();
+
+    let youtube_client = initialize_youtube().await;
 
     let mut handlebars = Handlebars::new();
 
@@ -175,6 +199,7 @@ async fn main() -> io::Result<()> {
             .app_data(handlebars_ref.clone())
             .app_data(web::Data::new(root_template_data.clone()))
             .app_data(web::Data::new(learning_data.clone()))
+            .app_data(web::Data::new(youtube_client.clone()))
             .wrap(NormalizePath::new(TrailingSlash::Trim))
             .wrap(error_handlers())
             .wrap(Logger::default())
