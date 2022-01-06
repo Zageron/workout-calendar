@@ -13,8 +13,15 @@
 A youtube driven workout calendar.
 
 - [Workout Calendar](#workout-calendar)
+  - [Upgrade dependencies](#upgrade-dependencies)
   - [Visual Studio Code](#visual-studio-code)
   - [Github Action Testing](#github-action-testing)
+
+## Upgrade dependencies
+
+```bash
+cargo upgrade --workspace --allow-prerelease ;; cargo update
+```
 
 ## Visual Studio Code
 

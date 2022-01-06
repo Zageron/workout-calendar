@@ -42,30 +42,6 @@
             },
         },
         {
-            "label": "Upgrade Dependencies",
-            "type": "shell",
-            "isBackground": false,
-            "command": [
-                "cargo",
-                "upgrade",
-                "--workspace",
-                "--allow-prerelease",
-                ";;",
-                "cargo",
-                "update"
-            ],
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "dedicated",
-                "showReuseMessage": false,
-                "clear": true,
-                "close": false,
-            },
-            "problemMatcher": []
-        },
-        {
             "label": "Ory Proxy",
             "type": "shell",
             "isBackground": true,
