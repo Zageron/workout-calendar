@@ -102,7 +102,7 @@ struct YouTubeUrlForm {
 }
 
 fn redirect_to(location: &str) -> HttpResponse {
-    HttpResponse::Found()
+    HttpResponse::SeeOther()
         .append_header((http::header::LOCATION, location))
         .finish()
 }
