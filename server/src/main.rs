@@ -11,7 +11,7 @@ use actix_http::body::{BoxBody, EitherBody};
 use actix_web::{
     dev::ServiceResponse,
     guard,
-    http::{header, StatusCode},
+    http::{self, header, StatusCode},
     middleware::{ErrorHandlerResponse, ErrorHandlers, Logger, NormalizePath, TrailingSlash},
     web, App, HttpRequest, HttpResponse, HttpServer, Result,
 };
@@ -19,12 +19,43 @@ use dotenv::dotenv;
 use handlebars::Handlebars;
 use mongodb::bson::doc;
 use serde::Deserialize;
-use std::{collections::BTreeMap, io};
+use std::{
+    collections::BTreeMap,
+    io,
+    ops::{Deref, DerefMut},
+    sync::RwLock,
+};
+use youtube::PlaylistWrapper;
 use youtube3::{
     hyper, hyper_rustls,
     oauth2::{self, InstalledFlowAuthenticator, InstalledFlowReturnMethod},
     YouTube,
 };
+
+#[derive(Clone)]
+struct UserState {
+    playlist: Option<PlaylistWrapper>,
+}
+
+impl UserState {
+    fn set_playlist(&mut self, playlist: PlaylistWrapper) {
+        self.playlist = Some(playlist);
+    }
+}
+
+impl Deref for UserState {
+    type Target = Option<PlaylistWrapper>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.playlist
+    }
+}
+
+impl DerefMut for UserState {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.playlist
+    }
+}
 
 #[derive(Clone, Debug, Deserialize)]
 struct RootData {
@@ -32,7 +63,7 @@ struct RootData {
 }
 
 #[derive(Clone, Debug, Deserialize)]
-struct LearningData {
+struct PlaylistData {
     data: BTreeMap<String, String>,
 }
 
@@ -40,48 +71,29 @@ struct LearningData {
 async fn index(
     hb: web::Data<Handlebars<'_>>,
     root_template_data: web::Data<RootData>,
+    state: web::Data<RwLock<UserState>>,
     _req: HttpRequest,
 ) -> HttpResponse {
-    let body = hb
-        .render("pages/calendar", &root_template_data.data)
-        .unwrap();
-    HttpResponse::Ok().body(body)
-}
+    let mut playlist_data: String = "".to_string();
+    if let Some(ref unwrapped_data) = state.read().unwrap().playlist {
+        playlist_data = format!(
+            "{:?}",
+            unwrapped_data.playlist.snippet.as_ref().unwrap().title
+        );
+    }
 
-#[derive(Deserialize, Debug)]
-struct Info {
-    entry_id: u32,
-}
+    let playlist_template_data = PlaylistData {
+        data: btreemap! {
+            "playlistExerp".to_string() => playlist_data,
+        },
+    };
 
-async fn study(_hb: web::Data<Handlebars<'_>>) -> HttpResponse {
-    HttpResponse::Ok().body("You need to pick an entry to study.")
-}
-
-async fn study_entry(_hb: web::Data<Handlebars<'_>>, info: web::Path<Info>) -> HttpResponse {
-    println!("Entry {:?}", info.entry_id);
-    HttpResponse::Ok().body(format!("GET: {:?}", info))
-}
-
-async fn study_submit(_hb: web::Data<Handlebars<'_>>, info: web::Path<Info>) -> HttpResponse {
-    HttpResponse::Ok().body(format!("POST: {:?}", info))
-}
-
-async fn learning_entry(
-    hb: web::Data<Handlebars<'_>>,
-    root_template_data: web::Data<RootData>,
-    learning_data: web::Data<LearningData>,
-) -> HttpResponse {
     let mut data: BTreeMap<&String, &String> = BTreeMap::new();
     data.extend(root_template_data.data.iter());
-    data.extend(learning_data.data.iter());
+    data.extend(playlist_template_data.data.iter());
 
-    let body = hb.render("pages/learn", &data).unwrap();
-    println!("{}", body);
+    let body = hb.render("pages/calendar", &data).unwrap();
     HttpResponse::Ok().body(body)
-}
-
-async fn youtube_view(_yt_client: web::Data<YouTube>) -> HttpResponse {
-    todo!();
 }
 
 #[derive(Deserialize)]
@@ -89,21 +101,27 @@ struct YouTubeUrlForm {
     url: String,
 }
 
-async fn youtube_submit(
+fn redirect_to(location: &str) -> HttpResponse {
+    HttpResponse::Found()
+        .append_header((http::header::LOCATION, location))
+        .finish()
+}
+
+async fn youtube_add_playlist(
     yt_client: web::Data<YouTube>,
     form: web::Form<YouTubeUrlForm>,
+    state: web::Data<RwLock<UserState>>,
 ) -> HttpResponse {
-    match url::Url::parse(&form.url) {
-        Ok(url) => {
-            if let Some((_query, arg)) = url.query_pairs().next() {
-                let playlist_items = youtube::request_playlists(&yt_client, &arg).await;
-                HttpResponse::Ok().body(format!("{:?}", playlist_items))
-            } else {
-                HttpResponse::Ok().body("No playlist ID.".to_string())
+    if let Ok(url) = url::Url::parse(&form.url) {
+        if let Some((_query, arg)) = url.query_pairs().next() {
+            if let Some(playlist) = youtube::request_playlist(&yt_client, &arg).await {
+                let mut mut_state = state.write().unwrap();
+                mut_state.set_playlist(playlist);
             }
         }
-        Err(_) => HttpResponse::Ok().body("No playlist ID.".to_string()),
     }
+
+    redirect_to("/")
 }
 
 async fn copyright(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
@@ -158,6 +176,8 @@ async fn main() -> io::Result<()> {
     #[cfg(debug_assertions)]
     env_logger::init();
 
+    let state = UserState { playlist: None };
+
     let youtube_client = initialize_youtube().await;
 
     let mut handlebars = Handlebars::new();
@@ -185,58 +205,20 @@ async fn main() -> io::Result<()> {
         },
     };
 
-    let learning_data = LearningData {
-        data: btreemap! {
-            "item_header".to_string() => "Test Item".to_string(),
-            "item_title".to_string() => "Sploosh".to_string(),
-            "item_description".to_string() => "Splooshes be splooshing.".to_string(),
-            "item_footer".to_string() => "You've learned this already.".to_string(),
-        },
-    };
-
     HttpServer::new(move || {
         App::new()
             .app_data(handlebars_ref.clone())
             .app_data(web::Data::new(root_template_data.clone()))
-            .app_data(web::Data::new(learning_data.clone()))
             .app_data(web::Data::new(youtube_client.clone()))
+            .app_data(web::Data::new(RwLock::new(state.clone())))
             .wrap(NormalizePath::new(TrailingSlash::Trim))
             .wrap(error_handlers())
             .wrap(Logger::default())
-            .service(
-                web::scope("/learn").service(
-                    web::resource(["/", ""])
-                        .guard(guard::Get())
-                        .to(learning_entry),
-                ),
-            )
-            .service(
-                web::scope("/study")
-                    .service(web::resource(["/", ""]).guard(guard::Get()).to(study))
-                    .service(
-                        web::resource("{entry_id}")
-                            .guard(guard::Get())
-                            .to(study_entry),
-                    )
-                    .service(
-                        web::resource("{entry_id}")
-                            .guard(guard::Post())
-                            .to(study_submit),
-                    ),
-            )
             .service(web::resource("/").guard(guard::Get()).to(index))
             .service(
-                web::scope("/youtube")
-                    .service(
-                        web::resource(["/", ""])
-                            .guard(guard::Get())
-                            .to(youtube_view),
-                    )
-                    .service(
-                        web::resource(["/", ""])
-                            .guard(guard::Post())
-                            .to(youtube_submit),
-                    ),
+                web::resource("youtube_add_playlist")
+                    .guard(guard::Post())
+                    .to(youtube_add_playlist),
             )
             .service(web::resource("copyright").guard(guard::Get()).to(copyright))
             .service(web::resource("robots.txt").guard(guard::Get()).to(robots))

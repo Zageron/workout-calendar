@@ -2,7 +2,7 @@
 
 <div class="root ">
     <div class="youtube-input-area">
-        <form action="youtube" method="post">
+        <form action="youtube_add_playlist" method="post">
             <label for="url">Playlist URL: </label>
             <input type="url" id="url" name="url" placeholder="Playlist URL"
                 pattern="https:\/\/(www.)?youtube.com\/playlist\?list=[^#&$?]*.*"
@@ -78,6 +78,11 @@
                 </div>
             </div>
         </div>
+    </div>
+
+
+    <div>
+        <p>{{playlistExerp}}</p>
     </div>
 
 </div>
