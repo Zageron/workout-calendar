@@ -5,6 +5,9 @@ extern crate maplit;
 extern crate dotenv;
 extern crate env_logger;
 extern crate google_youtube3 as youtube3;
+extern crate json_value_merge;
+
+use json_value_merge::Merge;
 
 use actix_files::Files;
 use actix_http::body::{BoxBody, EitherBody};
@@ -19,6 +22,7 @@ use dotenv::dotenv;
 use handlebars::Handlebars;
 use mongodb::bson::doc;
 use serde::Deserialize;
+use serde_json::{json, Value};
 use std::{
     collections::BTreeMap,
     io,
@@ -62,37 +66,26 @@ struct RootData {
     data: BTreeMap<String, String>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
-struct PlaylistData {
-    data: BTreeMap<String, String>,
-}
-
 // Macro documentation can be found in the actix_web_codegen crate
 async fn index(
     hb: web::Data<Handlebars<'_>>,
-    root_template_data: web::Data<RootData>,
+    root_template_data: web::Data<Value>,
     state: web::Data<RwLock<UserState>>,
     _req: HttpRequest,
 ) -> HttpResponse {
-    let mut playlist_data: String = "".to_string();
-    if let Some(ref unwrapped_data) = state.read().unwrap().playlist {
-        playlist_data = format!(
-            "{:?}",
-            unwrapped_data.playlist.snippet.as_ref().unwrap().title
-        );
+    let mut object: Value = Value::default();
+    let what = &*root_template_data.into_inner();
+    if let Some(obj) = what.as_object() {
+        object.merge_in("/", Value::Object(obj.clone())).unwrap();
     }
 
-    let playlist_template_data = PlaylistData {
-        data: btreemap! {
-            "playlistExerp".to_string() => playlist_data,
-        },
-    };
+    if let Some(ref unwrapped_data) = state.read().unwrap().playlist {
+        if let Ok(new_value) = serde_json::to_value(unwrapped_data) {
+            object.merge_in("/", new_value).unwrap();
+        }
+    }
 
-    let mut data: BTreeMap<&String, &String> = BTreeMap::new();
-    data.extend(root_template_data.data.iter());
-    data.extend(playlist_template_data.data.iter());
-
-    let body = hb.render("pages/calendar", &data).unwrap();
+    let body = hb.render("pages/calendar", &object).unwrap();
     HttpResponse::Ok().body(body)
 }
 
@@ -177,33 +170,29 @@ async fn main() -> io::Result<()> {
     env_logger::init();
 
     let state = UserState { playlist: None };
-
     let youtube_client = initialize_youtube().await;
 
     let mut handlebars = Handlebars::new();
-
     handlebars.set_dev_mode(cfg!(debug_assertions));
-
     handlebars
         .register_templates_directory(".hbs", "templates/")
         .unwrap();
+
     let handlebars_ref = web::Data::new(handlebars);
 
-    let _route =
+    let route =
         std::env::var("ROUTE").expect("Route is not set and is inferred to be unnecessary.");
-    let _base_url = std::env::var("BASE_URL");
-    assert!(_base_url.is_ok());
+    let base_url = std::env::var("BASE_URL");
+    assert!(base_url.is_ok());
 
-    let root_template_data = RootData {
-        data: btreemap! {
-            "title".to_string() => "Learn - Splatoon Callouts".to_string(),
-            "author".to_string() => "Zageron".to_string(),
-            "url".to_string() => _base_url.unwrap(),
-            "description".to_string() => "A Spaced Repetition site for memorizing Splatoon 2 callouts.".to_string(),
-            "route".to_string() => _route,
-            "parent".to_string() => "root".to_string()
-        },
-    };
+    let root_template_data = json!({
+        "title": "Learn - Splatoon Callouts",
+        "author": "Zageron",
+        "url": base_url.unwrap(),
+        "description": "A Spaced Repetition site for memorizing Splatoon 2 callouts.",
+        "route": route,
+        "parent": "root",
+    });
 
     HttpServer::new(move || {
         App::new()

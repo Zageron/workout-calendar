@@ -19,6 +19,7 @@ futures-core = "0.3.19"
 futures-util = "0.3.19"
 google-youtube3 = "2.0.10"
 handlebars = { version = "4.2.0", features = ["dir_source"] }
+json_value_merge = "1.1.2"
 maplit = "1.0.2"
 mime = "0.3.16"
 mongodb = "2.1.0"

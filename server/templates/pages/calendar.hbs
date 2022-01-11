@@ -14,6 +14,21 @@
     <div class="calendar disable-select">
         <div class="schedule-container">
             <div class="wrapper">
+                {{#each items}}
+                {{#with this.snippet as | meta | }}
+                <div class="cell draggable" draggable="true">
+                    <p>{{meta.title}}</p>
+                    <div class="box"></div>
+                </div>
+                {{/with}}
+                {{/each}}
+            </div>
+        </div>
+    </div>
+
+    <div class="calendar disable-select">
+        <div class="schedule-container">
+            <div class="wrapper">
                 <div class="cell-row-header">
                     <p>WK 1</p>
                 </div>

@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use youtube3::YouTube;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PlaylistWrapper {
     pub playlist: youtube3::api::Playlist,
     pub items: Vec<youtube3::api::PlaylistItem>,
@@ -21,7 +22,9 @@ pub async fn request_playlist(client: &YouTube, playlist_id: &str) -> Option<Pla
     {
         Ok((_response, result)) => {
             if let Some(item) = result.items {
-                possible_playlist = Some(item[0].clone());
+                if !item.is_empty() {
+                    possible_playlist = Some(item[0].clone());
+                }
             }
         }
         Err(e) => println!("Error: {:?}", e),
