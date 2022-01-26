@@ -18,14 +18,13 @@ default = ["console_error_panic_hook", "wee_alloc", "console_log"]
 cfg-if = "1.0.0"
 console_error_panic_hook = { version = "0.1.7", optional = true }
 console_log = { version = "0.2.0", features = ["color"], optional = true }
-js-sys = "0.3.56"
+js-sys = "=0.3.55"
 log = { version = "0.4.14", features = ["release_max_level_off"] }
-wasm-bindgen = "0.2.79"
-wasm-bindgen-test = "0.3.29"
+wasm-bindgen = "=0.2.78"
 wee_alloc = { version = "0.4.5", optional = true }
 
 [dependencies.web-sys]
-version = "0.3.56"
+version = "=0.3.55"
 features = [
     'DataTransfer',
     'Document',
@@ -43,4 +42,4 @@ features = [
 ]
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3.29"
+wasm-bindgen-test = "=0.3.28"
